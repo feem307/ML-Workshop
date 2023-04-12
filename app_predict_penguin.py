@@ -4,15 +4,22 @@ import pandas as pd
 import pickle
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
+import plotly.graph_objects as px
 import streamlit as st 
 
-model = pickle.load(open('model.penguins.sav','rb'))
-species_encoder = pickle.load(open('encoder.species.sav','rb'))
-island_encoder = pickle.load(open('encoder.island.sav','rb'))
-sex_encoder = pickle.load(open('encoder.sex.sav','rb'))
-evaluations = pickle.load(open('evals.all.sav','rb'))
+st.title('My ML Workshop 01 :) ')
 
-st.title('Penguin Species Prection :) ')
+tab1, tab2, tab3 = st.tabs(["Penguins Predict", "Evaluation", "About"])
+
+with tab1:
+    
+ model = pickle.load(open('model.penguins.sav','rb'))
+ species_encoder = pickle.load(open('encoder.species.sav','rb'))
+ island_encoder = pickle.load(open('encoder.island.sav','rb'))
+ sex_encoder = pickle.load(open('encoder.sex.sav','rb'))
+
+
+st.header('Penguin Species Prection :) ')
 
 x1 = st.radio('Select island', island_encoder.classes_)
 x1 = island_encoder.transform([x1])[0]
@@ -31,3 +38,27 @@ pred = model.predict(x_new)
 
 st.write('Predicted Species: ' , species_encoder.inverse_transform(pred)[0])
 
+with tab2:
+   st.header("Evaluations on Five Techniques")
+   evaluations = pickle.load(open('evals.all.sav','rb'))
+   st.dataframe(evaluations)
+    
+   x = evaluations.columns
+   fig = px.Figure(data=[
+        px.Bar(name = 'Decision Tree',
+               x = x,
+               y = evaluations.loc['Decision Tress']),
+        px.Bar(name = 'Random Forest',
+               x = x,
+               y =  evaluations.loc['Random Forest']),
+        px.Bar(name = 'KNN',
+               x = x,
+               y =  evaluations.loc['KNN']),
+        px.Bar(name = 'AdaBoost',
+               x = x,
+               y =  evaluations.loc['AdaBoost']),
+        px.Bar(name = 'XGBoost',
+               x = x,
+               y =  evaluations.loc['XGBoost'])
+    ])
+   st.plotly_chart(fig, use_container_width=True)
